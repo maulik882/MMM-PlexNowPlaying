@@ -57,7 +57,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * Override the start function.  Set some instance variables and validate the selected
 	 * configuration options before loading the rest of the module.
 	 */
-	start: function() {
+	start: function () {
 		var self = this;
 		self.loaded = false;
 		self.moduleWrapper = null;
@@ -68,10 +68,10 @@ Module.register("MMM-PlexNowPlaying", {
 		self.progressTimer = null;
 		self.lastUpdateTime = new Date(0);
 		self.maxDataAttempts = 3;
-		self.validFontSizes = [ "x-small", "small", "medium", "large", "x-large" ];
-		self.validNetworkFilters = [ "local", "remote", "both" ];
-		self.validPlayStateFilters = [ "playing", "paused", "both" ];
-		self.validServerProtocols = [ "http", "https" ];
+		self.validFontSizes = ["x-small", "small", "medium", "large", "x-large"];
+		self.validNetworkFilters = ["local", "remote", "both"];
+		self.validPlayStateFilters = ["playing", "paused", "both"];
+		self.validServerProtocols = ["http", "https"];
 
 		if (!axis.isString(self.config.serverAddress) || 0 === self.config.serverAddress.length) {
 			self.log("A server URL is required. ", "error");
@@ -81,7 +81,7 @@ Module.register("MMM-PlexNowPlaying", {
 			self.log("An X-Plex-Token is required. ", "error");
 			return;
 		}
-		
+
 		if (!axis.isString(self.config.headerTemplate) || 0 === self.config.headerTemplate.length) {
 			self.config.headerTemplate = self.defaults.headerTemplate;
 		}
@@ -122,11 +122,11 @@ Module.register("MMM-PlexNowPlaying", {
 		if (!axis.isBoolean(self.config.enableProgressTimer)) { self.config.enableProgressTimer = self.defaults.enableProgressTimer; }
 
 		// validate arrays of strings
-		var listOfArrays = [ "userWhiteList", "userBlackList", "typeWhiteList", "typeBlackList", "libraryWhiteList", "libraryBlackList" ];
-		listOfArrays.forEach(function(arr) {
+		var listOfArrays = ["userWhiteList", "userBlackList", "typeWhiteList", "typeBlackList", "libraryWhiteList", "libraryBlackList"];
+		listOfArrays.forEach(function (arr) {
 			if (axis.isArray(self.config[arr])) {
 				var temp = [];
-				self.config[arr].forEach(function(str) {
+				self.config[arr].forEach(function (str) {
 					if (axis.isString(str)) { temp.push(str); }
 				});
 				self.config[arr] = temp;
@@ -158,7 +158,7 @@ Module.register("MMM-PlexNowPlaying", {
 
 		if (self.config.initialLoadDelay > 0) {
 			self.log(self.translate("INITIAL_DELAY", { "seconds": (self.config.initialLoadDelay / 1000) }));
-			setTimeout(function(){ self.getData(1); self.scheduleUpdate(); }, self.config.initialLoadDelay );
+			setTimeout(function () { self.getData(1); self.scheduleUpdate(); }, self.config.initialLoadDelay);
 		} else {
 			self.getData(1);
 			self.scheduleUpdate();
@@ -170,7 +170,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * Override the suspend function that is called when the module instance is hidden.
 	 * This method stops the update timer.
 	 */
-	suspend: function() {
+	suspend: function () {
 		var self = this;
 		self.log(self.translate("SUSPENDED") + ".");
 		clearInterval(self.updateTimer);
@@ -181,22 +181,22 @@ Module.register("MMM-PlexNowPlaying", {
 	 * This method re-starts the update timer and calls for an update if the update interval
 	 * has been passed since the module was suspended.
 	 */
-	resume: function() {
+	resume: function () {
 		var self = this;
 		self.log(self.translate("RESUMED") + ".");
 		self.scheduleUpdate();
 		var date = new Date();
-		var threshold = new Date( self.lastUpdateTime.getTime() + self.config.updateInterval );
+		var threshold = new Date(self.lastUpdateTime.getTime() + self.config.updateInterval);
 		if (date >= threshold) { self.getData(1); }
 	},
 
 	/**
 	 * The scheduleUpdate function starts the auto update timer.
 	 */
-	scheduleUpdate: function() {
+	scheduleUpdate: function () {
 		var self = this;
-		self.updateTimer = setInterval(function() { self.getData(1); }, self.config.updateInterval);
-		self.log( self.translate("UPDATE_SCHEDULED", { "seconds": (self.config.updateInterval / 1000) }) );
+		self.updateTimer = setInterval(function () { self.getData(1); }, self.config.updateInterval);
+		self.log(self.translate("UPDATE_SCHEDULED", { "seconds": (self.config.updateInterval / 1000) }));
 	},
 
 	/**
@@ -204,7 +204,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 *
 	 * @param attemptNum (number) The number of attempts to get the data
 	 */
-	getData: function(attemptNum) {
+	getData: function (attemptNum) {
 		var self = this;
 
 		if (attemptNum > self.maxDataAttempts) {
@@ -220,7 +220,7 @@ Module.register("MMM-PlexNowPlaying", {
 
 		var xhttp = new XMLHttpRequest();
 
-		xhttp.onreadystatechange = function() {
+		xhttp.onreadystatechange = function () {
 			if (this.readyState == 4) {
 				if (this.status == 200) {
 					self.log(self.translate("DATA_SUCCESS", { "numberOfAttempts": attemptNum }));
@@ -234,7 +234,7 @@ Module.register("MMM-PlexNowPlaying", {
 				} else {
 					self.log("Error: " + this.status + ": " + this.statusText, "warn");
 					self.log(self.translate("DATA_FAILURE_RETRY", { "retryTimeInSeconds": (self.config.retryDelay / 1000) }), "warn");
-					setTimeout(function() { self.getData(attemptNum + 1); }, self.config.retryDelay);
+					setTimeout(function () { self.getData(attemptNum + 1); }, self.config.retryDelay);
 				}
 			}
 		};
@@ -250,7 +250,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @param endpoint (string) The endpoint to use when building the URL
 	 * @return (string) The fully qualified URL for the requested endpoint
 	 */
-	buildURL: function(endpoint) {
+	buildURL: function (endpoint) {
 		if (endpoint.indexOf('http') === 0) {
 			return endpoint;
 		}
@@ -265,7 +265,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @param (string) the username to be replaced
 	 * @reutrn The substitute name
 	 */
-	replaceUserName: function(username) {
+	replaceUserName: function (username) {
 		return this.config.userNameFilter[username] ? this.config.userNameFilter[username] : username;
 	},
 
@@ -275,7 +275,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 *
 	 * @param rawXML (string) The xml stirng to parse
 	 */
-	parseData: function(rawXML) {
+	parseData: function (rawXML) {
 		var self = this;
 
 		var newData = [];
@@ -440,11 +440,11 @@ Module.register("MMM-PlexNowPlaying", {
 			}
 
 			var userListCheck = (!item.user || (!self.config.userBlackList.includes(item.user.title) &&
-				(0 === self.config.userWhiteList.length || self.config.userWhiteList.includes(item.user.title)) ) );
+				(0 === self.config.userWhiteList.length || self.config.userWhiteList.includes(item.user.title))));
 			var typeListCheck = (!self.config.typeBlackList.includes(item.type) &&
-				(0 === self.config.typeWhiteList.length || self.config.typeWhiteList.includes(item.type)) );
+				(0 === self.config.typeWhiteList.length || self.config.typeWhiteList.includes(item.type)));
 			var libraryListCheck = (!self.config.libraryBlackList.includes(item.libraryTitle) &&
-				(0 === self.config.libraryWhiteList.length || self.config.libraryWhiteList.includes(item.libraryTitle)) );
+				(0 === self.config.libraryWhiteList.length || self.config.libraryWhiteList.includes(item.libraryTitle)));
 			var networkFilterCheck = ("both" === self.config.networkFilter || (
 				("1" === item.player.local && "local" === self.config.networkFilter) ||
 				("0" === item.player.local && "remote" === self.config.networkFilter)));
@@ -467,7 +467,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @param payload (any) The data sent with the notification
 	 * @param sender (object) The module that the notification originated from
 	 */
-	notificationReceived: function(notification, payload, sender) {
+	notificationReceived: function (notification, payload, sender) {
 		var self = this;
 
 		if (sender) { // If the notification is coming from another module
@@ -487,7 +487,7 @@ Module.register("MMM-PlexNowPlaying", {
 	/**
 	 * Override the getHeader function to generate the header or hide the header depending on settings
 	 */
-	getHeader: function() {
+	getHeader: function () {
 		var self = this;
 		let count = (!self.loaded || null === self.plexData) ? 0 : self.plexData.length;
 		var template = 0 === count ? self.config.headerTemplateZero : self.config.headerTemplate;
@@ -499,7 +499,7 @@ Module.register("MMM-PlexNowPlaying", {
 	/**
 	 * Override the getDom function to generate the DOM objects to be displayed for this module instance
 	 */
-	getDom: function() {
+	getDom: function () {
 		var self = this;
 		var icon;
 		var mainTable
@@ -521,7 +521,7 @@ Module.register("MMM-PlexNowPlaying", {
 				if (self.config.animationSpeed > 0) {
 					self.moduleWrapper.style.transition = "opacity " + self.config.animationSpeed / 1000 + "s";
 					clearTimeout(self.positionTimer);
-					self.positionTimer = setTimeout(function(){
+					self.positionTimer = setTimeout(function () {
 						self.moduleWrapper.style.position = "fixed";
 					}, self.config.animationSpeed);
 				} else {
@@ -587,7 +587,11 @@ Module.register("MMM-PlexNowPlaying", {
 
 				switch (item.type) {
 					case "episode":
-						dataCell.appendChild(document.createTextNode(item.seriesTitle));
+						var titleDiv = document.createElement("div");
+						titleDiv.innerText = item.seriesTitle;
+						if (item.seriesTitle.length > 25) { titleDiv.classList.add("long-title"); }
+						dataCell.appendChild(titleDiv);
+
 						secondary = document.createElement("div");
 						secondary.setAttribute("class", "secondary-text");
 						if (item.isLive) {
@@ -620,7 +624,11 @@ Module.register("MMM-PlexNowPlaying", {
 						}
 						break;
 					case "movie":
-						dataCell.appendChild(document.createTextNode(item.title));
+						var titleDiv = document.createElement("div");
+						titleDiv.innerText = item.title;
+						if (item.title.length > 25) { titleDiv.classList.add("long-title"); }
+						dataCell.appendChild(titleDiv);
+
 						secondary = document.createElement("div");
 						secondary.setAttribute("class", "secondary-text");
 						if (null !== item.year) {
@@ -641,7 +649,11 @@ Module.register("MMM-PlexNowPlaying", {
 						}
 						break;
 					case "trailer":
-						dataCell.appendChild(document.createTextNode(item.title));
+						var titleDiv = document.createElement("div");
+						titleDiv.innerText = item.title;
+						if (item.title.length > 25) { titleDiv.classList.add("long-title"); }
+						dataCell.appendChild(titleDiv);
+
 						secondary = document.createElement("div");
 						secondary.setAttribute("class", "secondary-text");
 						secondary.appendChild(document.createTextNode("Trailer"));
@@ -652,7 +664,11 @@ Module.register("MMM-PlexNowPlaying", {
 						imageCell.appendChild(icon);
 						break;
 					case "track":
-						dataCell.appendChild(document.createTextNode(item.title));
+						var titleDiv = document.createElement("div");
+						titleDiv.innerText = item.title;
+						if (item.title.length > 25) { titleDiv.classList.add("long-title"); }
+						dataCell.appendChild(titleDiv);
+
 						var artist = document.createElement("div");
 						artist.setAttribute("class", "secondary-text");
 						icon = document.createElement("span");
@@ -681,7 +697,11 @@ Module.register("MMM-PlexNowPlaying", {
 						}
 						break;
 					case "photo":
-						dataCell.appendChild(document.createTextNode(item.title));
+						var titleDiv = document.createElement("div");
+						titleDiv.innerText = item.title;
+						if (item.title.length > 25) { titleDiv.classList.add("long-title"); }
+						dataCell.appendChild(titleDiv);
+
 						var folder = document.createElement("div");
 						folder.setAttribute("class", "secondary-text");
 						icon = document.createElement("span");
@@ -709,7 +729,10 @@ Module.register("MMM-PlexNowPlaying", {
 						imageCell.appendChild(icon);
 						dataCell = document.createElement("td");
 						dataCell.setAttribute("class", "dataCell");
-						dataCell.appendChild(document.createTextNode(item.title));
+						var titleDiv = document.createElement("div");
+						titleDiv.innerText = item.title;
+						if (item.title.length > 25) { titleDiv.classList.add("long-title"); }
+						dataCell.appendChild(titleDiv);
 						break;
 					default:
 						imageCell.setAttribute("class", "iconImgCell");
@@ -718,7 +741,10 @@ Module.register("MMM-PlexNowPlaying", {
 						imageCell.appendChild(icon);
 						dataCell = document.createElement("td");
 						dataCell.setAttribute("class", "dataCell");
-						dataCell.appendChild(document.createTextNode(item.title));
+						var titleDiv = document.createElement("div");
+						titleDiv.innerText = item.title;
+						if (item.title.length > 25) { titleDiv.classList.add("long-title"); }
+						dataCell.appendChild(titleDiv);
 				}
 
 				if (item.user && self.config.showUser) {
@@ -800,7 +826,7 @@ Module.register("MMM-PlexNowPlaying", {
 
 		if (self.config.enableProgressTimer) {
 			// Set the interval timer for the progress tick
-			self.progressTimer = setInterval(function(){ self.progressTick(); }, 1000);
+			self.progressTimer = setInterval(function () { self.progressTick(); }, 1000);
 		}
 
 		return wrapper;
@@ -809,7 +835,7 @@ Module.register("MMM-PlexNowPlaying", {
 	/**
 	 * The progressTick function adds one second to the progress bars to sho wprogress between updates from the server
 	 */
-	progressTick: function() {
+	progressTick: function () {
 		var self = this;
 		var progressBars = self.moduleWrapper.getElementsByClassName("progressBar");
 		//self.log("progressBars: " + typeof(progressBars) + " size: " + progressBars.length, "dev");
@@ -832,7 +858,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @param replace (string) The string to use as a replacement for the find string
 	 * @return (string) A copy of str with all the find occurrences replaced with replace
 	 */
-	replaceAll: function(str, find, replace) {
+	replaceAll: function (str, find, replace) {
 		var output = "";
 		var idx = str.indexOf(find);
 		while (idx >= 0) {
@@ -850,7 +876,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @param input (string) The string apply the trailing slash to
 	 * @return (string) The input string with a single trailing slash
 	 */
-	trailingSlashIt: function(input) {
+	trailingSlashIt: function (input) {
 		return this.unTrailingSlashIt(input) + "/";
 	},
 
@@ -860,7 +886,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @param input (string) The string remove the trailing slash from
 	 * @return (string) The input string with no trailing slash
 	 */
-	unTrailingSlashIt: function(input) {
+	unTrailingSlashIt: function (input) {
 		return input.replace(new RegExp("[\\/]+$"), "");
 	},
 
@@ -870,7 +896,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @param input (string) The string apply the leading slash to
 	 * @return (string) The input string with a single slash at the beginning
 	 */
-	leadingSlashIt: function(input) {
+	leadingSlashIt: function (input) {
 		return "/" + this.unLeadingSlashIt(input);
 	},
 
@@ -880,14 +906,14 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @param input (string) The string remove the leading slash from
 	 * @return (string) The input string with no slashes at the beginning
 	 */
-	unLeadingSlashIt: function(input) {
+	unLeadingSlashIt: function (input) {
 		return input.replace(new RegExp("^[\\/]+"), "");
 	},
 
 	/**
 	 * Override the getScripts function to load additional scripts used by this module.
 	 */
-	getScripts: function() {
+	getScripts: function () {
 		var scripts = [];
 		if (typeof axis !== "object") { scripts.push(this.file("scripts/axis.js")); }
 		return scripts;
@@ -908,7 +934,7 @@ Module.register("MMM-PlexNowPlaying", {
 	/**
 	 * Override the getTranslations function to load translation files specific to this module.
 	 */
-	getTranslations: function() {
+	getTranslations: function () {
 		return {
 			en: "translations/en.json"
 		};
@@ -922,7 +948,7 @@ Module.register("MMM-PlexNowPlaying", {
 	 * @param message (string) The message to be sent to the console
 	 * @param type (string) The type of message (dev, error, info, log)
 	 */
-	log: function(message, type) {
+	log: function (message, type) {
 		var self = this;
 		if (self.config.developerMode) {
 			var date = new Date();
